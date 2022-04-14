@@ -1,6 +1,9 @@
-const express = require('express');
+/*/const express = require('express');
 const  logger  = require('../logger/logger');
 const helper=require('../util/helper')
+
+const authordetails=require("../model/authormodel")
+const bookdetails=require("../model/booksmodel")
 
 const userModel=require("../model/usermodel")
 const Usercontroller=require("../controller/Usercontroller")
@@ -158,7 +161,58 @@ router.get('/getAllUsers',Usercontroller.getUserData);
 router.get('/getBooks',Usercontroller.getBooks);
 router.get('/getXINRBooks',Usercontroller.getXINRBooks);
 router.get('/getRandomBooks',Usercontroller.getRandomBooks);
-router.get('/getParticularBooks',Usercontroller.getParticularBooks);
+router.post('/getParticularBooks',Usercontroller.getParticularBooks);
+
+/*/
+const express=require('express');
+const router=express.Router();
+const authordetails=require("../model/authormodel")
+const bookdetails=require("../model/booksmodel")
+
+router.post("/createauthor",async function (req,res){
+    const data=await authordetails.create(req.body)
+    res.send({msg:data})
+})
+
+router.post("/creatbook",async function(req,res){
+    const data=await bookdetails.create(req.body)
+    res.send({msg:data})
+})
+
+
+router.get("/grtchetanbook",async function (req,res){
+    const data=await authordetails.find({author_name:"Chetan Bhagat"})
+    
+    const id= data[0].author_id
+    const bookname=await bookdetails.findOne({author_id: id}).select({name:1,_id:0})
+    res.send({msg:bookname})
+})
+
+router.get("/updateprice", async function(req,res){
+    const data= await bookdetails.find({name:"Two states"})
+    const id=data[0].author_id
+    const authorname=await authordetails.find({author_id:id}).select({author_name:1,_id:0})
+    const Bookname=data[0].name
+    const priceupdate=await bookdetails.findOneAndUpdate({name:Bookname},{price:100},{new:true}).select({price:1,_id:0})
+    res.send({msg:authorname,priceupdate})
+})
+
+
+router.get("/costbetween", async function(req,res){
+    const data=await bookdetails.find({price:{$gte:50,$lte:100}}).select({author_id:1,_id:0})
+    const id= data.map(inp=> inp.author_id)
+    let arr=[]
+    for(let i =0; i<id.length;i++)
+    {
+        let k=id[i]
+        const author=await authordetails.find({author_id:k}).select({author_name:1,_id:0})
+        arr.push(author)
+        
+    }
+    const authorname = arr.flat()
+    res.send({msg:authorname})
+})
+
 
 
 module.exports = router
